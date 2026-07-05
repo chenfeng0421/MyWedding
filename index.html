@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💒 婚礼策划助手 - Wedding Planner</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --primary: #d4a574;
+  --primary-dark: #b8864e;
+  --primary-light: #f5e6d3;
+  --accent: #e8c5a0;
+  --bg: #faf7f4;
+  --bg-card: #ffffff;
+  --text: #3d3027;
+  --text-light: #7a6e63;
+  --border: #e8ddd2;
+  --danger: #c0392b;
+  --success: #27ae60;
+  --warning: #f39c12;
+  --info: #3498db;
+  --shadow: 0 2px 12px rgba(61,48,39,0.08);
+  --shadow-lg: 0 8px 30px rgba(61,48,39,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+  --header-h: 64px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, #3d3027 0%, #5a4a3a 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform 0.3s;
+}
+
+.sidebar-logo {
+  padding: 24px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.sidebar-logo p {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  opacity: 0.7;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.05);
+}
+
+.nav-item.active {
+  opacity: 1;
+  background: rgba(255,255,255,0.1);
+  border-left-color: var(--accent);
+}
+
+.nav-item i {
+  width: 20px;
+  text-align: center;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* Main Content */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  height: var(--header-h);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.content {
+  flex: 1;
+  padding: 32px;
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.stat-icon.budget { background: #fef3e2; color: var(--warning); }
+.stat-icon.guests { background: #e8f4fd; color: var(--info); }
+.stat-icon.tasks  { background: #e8f8e8; color: var(--success); }
+.stat-icon.photos { background: #fde8f0; color: #e84393; }
+.stat-icon.days   { background: #ede4f5; color: #9b59b6; }
+
+.stat-info h3 { font-size: 24px; font-weight: 700; }
+.stat-info p  { font-size: 12px; color: var(--text-light); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover { background: var(--border); }
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+.btn-icon { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+/* Forms */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-light);
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+tr:hover td { background: var(--bg); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tag-success { background: #e8f8e8; color: var(--success); }
+.tag-warning { background: #fef3e2; color: var(--warning); }
+.tag-danger  { background: #fde8e8; color: var(--danger); }
+.tag-info    { background: #e8f4fd; color: var(--info); }
+.tag-default { background: #f0ebe4; color: var(--text-light); }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.modal h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Countdown */
+.countdown-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.countdown-item {
+  background: var(--primary-light);
+  border-radius: var(--radius);
+  padding: 16px 8px;
+}
+
+.countdown-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.countdown-label {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+/* Photo Grid */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.photo-card {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background: var(--bg);
+  border: 2px dashed var(--border);
+}
+
+.photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-card .photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #fff;
+}
+
+.photo-card:hover .photo-overlay { opacity: 1; }
+
+.photo-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.photo-add i { font-size: 32px; }
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  padding: 8px 0 24px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.timeline-time {
+  font-size: 12px;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.timeline-title {
+  font-weight: 600;
+  margin: 2px 0;
+}
+
+.timeline-desc {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.progress-fill.green { background: var(--success); }
+.progress-fill.yellow { background: var(--warning); }
+.progress-fill.red { background: var(--danger); }
+.progress-fill.blue { background: var(--info); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-light);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.active {
+  color: var(--primary-dark);
+  border-bottom-color: var(--primary-dark);
+}
+
+/* Settings */
+.settings-section {
+  margin-bottom: 28px;
+}
+
+.settings-section h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Alert */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.alert-success { background: #e8f8e8; color: #1e7e34; }
+.alert-error   { background: #fde8e8; color: var(--danger); }
+.alert-info    { background: #e8f4fd; color: #1a6ba0; }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  animation: slideIn 0.3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast-success { background: var(--success); }
+.toast-error   { background: var(--danger); }
+.toast-info    { background: var(--info); }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main { margin-left: 0; }
+  .content { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .countdown-grid { grid-template-columns: repeat(2, 1fr); }
+  .header { padding: 0 16px; }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+/* Chart container */
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  margin: 16px 0;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-light);
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+
+.empty-state h3 { font-size: 16px; margin-bottom: 6px; }
+.empty-state p  { font-size: 13px; }
+
+/* Guest RSVP styles */
+.rsvp-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.rsvp-yes     { background: var(--success); }
+.rsvp-no      { background: var(--danger); }
+.rsvp-pending { background: var(--warning); }
+.rsvp-maybe   { background: var(--info); }
+
+/* Hide sections by default */
+.section { display: none; }
+.section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h1>💒 婚礼策划助手</h1>
+    <p>Wedding Planner</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-section="dashboard">
+      <i class="fa-solid fa-chart-pie"></i> 仪表盘
+    </div>
+    <div class="nav-item" data-section="budget">
+      <i class="fa-solid fa-wallet"></i> 预算追踪
+    </div>
+    <div class="nav-item" data-section="guests">
+      <i class="fa-solid fa-users"></i> 宾客管理
+      <span class="nav-badge" id="guest-count-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-section="timeline">
+      <i class="fa-solid fa-clock"></i> 婚礼时间线
+    </div>
+    <div class="nav-item" data-section="photos">
+      <i class="fa-solid fa-images"></i> 相册
+    </div>
+    <div class="nav-item" data-section="tasks">
+      <i class="fa-solid fa-list-check"></i> 任务清单
+    </div>
+    <div class="nav-item" data-section="settings">
+      <i class="fa-solid fa-gear"></i> 设置 & 同步
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <i class="fa-solid fa-cloud"></i> 数据本地存储 · 支持GitHub同步
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <header class="header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <h2 class="header-title" id="header-title">仪表盘</h2>
+    </div>
+    <div class="header-actions">
+      <span style="font-size:13px;color:var(--text-light);" id="wedding-date-display"></span>
+      <button class="btn btn-secondary btn-sm" onclick="switchSection('settings')">
+        <i class="fa-solid fa-gear"></i> 设置
+      </button>
+    </div>
+  </header>
+
+  <div class="content" id="content-area">
+    <!-- Sections will be rendered here -->
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ==================== DATA STORE ====================
+const STORAGE_KEY = 'wedding_planner_data';
+
+const DEFAULT_DATA = {
+  weddingDate: '',
+  partner1: '新娘',
+  partner2: '新郎',
+  budget: { total: 0, items: [] },
+  guests: [],
+  timeline: [],
+  photos: [],
+  tasks: [],
+  settings: {
+    githubToken: '',
+    githubRepo: '',
+    githubUser: '',
+    lastSync: null
+  }
+};
+
+let appData = loadData();
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      // Deep merge with defaults
+      return { ...DEFAULT_DATA, ...data, settings: { ...DEFAULT_DATA.settings, ...(data.settings || {}) } };
+    }
+  } catch(e) { console.error('数据加载失败:', e); }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+}
+
+// ==================== TOAST ====================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 3000);
+}
+
+// ==================== MODAL ====================
+function showModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function hideModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) hideModal();
+});
+
+// ==================== SIDEBAR ====================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+let currentSection = 'dashboard';
+
+function switchSection(section) {
+  currentSection = section;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.section === section);
+  });
+  document.getElementById('sidebar').classList.remove('open');
+  renderSection(section);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => switchSection(item.dataset.section));
+});
+
+// ==================== RENDER ENGINE ====================
+function renderSection(section) {
+  const content = document.getElementById('content-area');
+  const titles = {
+    dashboard: '仪表盘',
+    budget: '预算追踪',
+    guests: '宾客管理',
+    timeline: '婚礼时间线',
+    photos: '相册',
+    tasks: '任务清单',
+    settings: '设置 & 同步'
+  };
+  document.getElementById('header-title').textContent = titles[section] || '';
+
+  switch(section) {
+    case 'dashboard': content.innerHTML = renderDashboard(); break;
+    case 'budget':    content.innerHTML = renderBudget(); break;
+    case 'guests':    content.innerHTML = renderGuests(); break;
+    case 'timeline':  content.innerHTML = renderTimeline(); break;
+    case 'photos':    content.innerHTML = renderPhotos(); break;
+    case 'tasks':     content.innerHTML = renderTasks(); break;
+    case 'settings':  content.innerHTML = renderSettings(); break;
+  }
+
+  // Re-bind events after render
+  setTimeout(bindSectionEvents, 50);
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  const { budget, guests, tasks, photos, weddingDate } = appData;
+  const totalBudget = budget.total || 0;
+  const totalSpent = budget.items.reduce((sum, i) => sum + (i.amount || 0), 0);
+  const remaining = totalBudget - totalSpent;
+  const budgetPercent = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
+  const guestYes = guests.filter(g => g.rsvp === 'yes').length;
+  const guestTotal = guests.length;
+  const taskDone = tasks.filter(t => t.done).length;
+  const taskTotal = tasks.length;
+  const taskPercent = taskTotal > 0 ? Math.round((taskDone / taskTotal) * 100) : 0;
+
+  // Countdown
+  let countdownHtml = '';
+  if (weddingDate) {
+    const now = new Date();
+    const wd = new Date(weddingDate);
+    const diff = wd - now;
+    const days = Math.max(0, Math.floor(diff / (1000*60*60*24)));
+    const hours = Math.max(0, Math.floor((diff % (1000*60*60*24)) / (1000*60*60)));
+    const mins = Math.max(0, Math.floor((diff % (1000*60*60)) / (1000*60)));
+    const secs = Math.max(0, Math.floor((diff % (1000*60)) / 1000));
+    countdownHtml = `
+      <div class="card">
+        <div class="card-title">💕 距离婚礼还有</div>
+        <div class="countdown-grid">
+          <div class="countdown-item"><div class="countdown-num">${days}</div><div class="countdown-label">天</div></div>
+          <div class="countdown-item"><div class="countdown-num">${hours}</div><div class="countdown-label">小时</div></div>
+          <div class="countdown-item"><div class="countdown-num">${mins}</div><div class="countdown-label">分钟</div></div>
+          <div class="countdown-item"><div class="countdown-num">${secs}</div><div class="countdown-label">秒</div></div>
+        </div>
+        <p style="text-align:center;color:var(--text-light);font-size:13px;">📅 ${new Date(weddingDate).toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'})}</p>
+      </div>`;
+  }
+
+  return `
+    ${countdownHtml}
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon budget"><i class="fa-solid fa-coins"></i></div>
+        <div class="stat-info">
+          <p>总预算</p>
+          <h3>¥${totalBudget.toLocaleString()}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon budget"><i class="fa-solid fa-receipt"></i></div>
+        <div class="stat-info">
+          <p>已花费</p>
+          <h3>¥${totalSpent.toLocaleString()}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon guests"><i class="fa-solid fa-user-check"></i></div>
+        <div class="stat-info">
+          <p>确认出席</p>
+          <h3>${guestYes}/${guestTotal}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon tasks"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="stat-info">
+          <p>任务完成</p>
+          <h3>${taskDone}/${taskTotal}</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon photos"><i class="fa-solid fa-camera"></i></div>
+        <div class="stat-info">
+          <p>照片数量</p>
+          <h3>${photos.length}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💰 预算使用情况</div>
+        <span>${budgetPercent}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill ${budgetPercent > 100 ? 'red' : budgetPercent > 80 ? 'yellow' : 'green'}" style="width:${Math.min(budgetPercent, 100)}%"></div></div>
+      <p style="margin-top:8px;font-size:13px;color:var(--text-light);">剩余预算：¥${remaining.toLocaleString()} ${remaining < 0 ? '⚠️ 已超支' : ''}</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">✅ 任务进度</div>
+        <span>${taskPercent}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill blue" style="width:${taskPercent}%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 预算分类占比</div>
+      <div class="chart-wrap"><canvas id="budgetChart"></canvas></div>
+    </div>
+  `;
+}
+
+// ==================== BUDGET ====================
+function renderBudget() {
+  const items = appData.budget.items || [];
+  const total = appData.budget.total || 0;
+  const spent = items.reduce((s, i) => s + (i.amount || 0), 0);
+
+  let rows = items.map((item, idx) => `
+    <tr>
+      <td>${item.category || '-'}</td>
+      <td>${item.name || '-'}</td>
+      <td>¥${(item.amount || 0).toLocaleString()}</td>
+      <td>${item.date || '-'}</td>
+      <td>${item.note || '-'}</td>
+      <td>${item.paid ? '<span class="tag tag-success">已付</span>' : '<span class="tag tag-warning">未付</span>'}</td>
+      <td>
+        <button class="btn btn-secondary btn-xs" onclick="editBudgetItem('${item.id}')" title="编辑"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-danger btn-xs" onclick="deleteBudgetItem('${item.id}')" title="删除"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">💰 预算总览</div>
+        <button class="btn btn-primary" onclick="showBudgetForm()"><i class="fa-solid fa-plus"></i> 添加支出</button>
+      </div>
+      <div class="stats-grid" style="margin-bottom:16px;">
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon budget"><i class="fa-solid fa-piggy-bank"></i></div>
+          <div class="stat-info"><p>总预算</p><h3>¥${total.toLocaleString()}</h3></div>
+        </div>
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon ${spent > total ? 'danger' : 'budget'}" style="background:${spent > total ? '#fde8e8' : '#fef3e2'};color:${spent > total ? 'var(--danger)' : 'var(--warning)'};"><i class="fa-solid fa-credit-card"></i></div>
+          <div class="stat-info"><p>已花费</p><h3>¥${spent.toLocaleString()}</h3></div>
+        </div>
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon ${total - spent < 0 ? 'danger' : 'budget'}" style="background:${total - spent < 0 ? '#fde8e8' : '#e8f8e8'};color:${total - spent < 0 ? 'var(--danger)' : 'var(--success)'};"><i class="fa-solid fa-scale-balanced"></i></div>
+          <div class="stat-info"><p>剩余</p><h3>¥${(total - spent).toLocaleString()}</h3></div>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-group">
+          <label>总预算金额</label>
+          <input type="number" class="form-input" id="total-budget-input" value="${total}" placeholder="设定婚礼总预算" onchange="updateTotalBudget(this.value)">
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="budgetCategoryChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 支出明细</div>
+      ${items.length === 0 ? '<div class="empty-state"><i class="fa-solid fa-receipt"></i><h3>暂无支出记录</h3><p>点击上方按钮添加第一笔支出</p></div>' : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>分类</th><th>项目</th><th>金额</th><th>日期</th><th>备注</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`}
+    </div>
+  `;
+}
+
+function showBudgetForm(item = null) {
+  const isEdit = !!item;
+  const categories = ['婚宴酒席','婚纱摄影','婚庆策划','婚纱礼服','珠宝首饰','化妆造型','婚车租赁','蜜月旅行','喜糖回礼','其他'];
+  const catOptions = categories.map(c => `<option value="${c}" ${item && item.category === c ? 'selected' : ''}>${c}</option>`).join('');
+
+  showModal(`
+    <h2>${isEdit ? '编辑' : '添加'}支出</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>分类</label>
+        <select class="form-select" id="budget-category">${catOptions}</select>
+      </div>
+      <div class="form-group">
+        <label>金额 (¥)</label>
+        <input type="number" class="form-input" id="budget-amount" value="${item ? item.amount : ''}" placeholder="0">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>项目名称</label>
+      <input type="text" class="form-input" id="budget-name" value="${item ? item.name : ''}" placeholder="例如：婚宴场地费">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" class="form-input" id="budget-date" value="${item ? item.date : ''}">
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:16px;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:20px;">
+          <input type="checkbox" id="budget-paid" ${item && item.paid ? 'checked' : ''}> 已付款
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <textarea class="form-textarea" id="budget-note" placeholder="补充说明...">${item ? item.note || '' : ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveBudgetItem('${item ? item.id : ''}')">保存</button>
+    </div>
+  `);
+}
+
+function saveBudgetItem(id) {
+  const item = {
+    id: id || generateId(),
+    category: document.getElementById('budget-category').value,
+    amount: parseFloat(document.getElementById('budget-amount').value) || 0,
+    name: document.getElementById('budget-name').value,
+    date: document.getElementById('budget-date').value,
+    paid: document.getElementById('budget-paid').checked,
+    note: document.getElementById('budget-note').value
+  };
+
+  if (!item.name || !item.amount) {
+    showToast('请填写项目名称和金额', 'error');
+    return;
+  }
+
+  const items = appData.budget.items || [];
+  const idx = items.findIndex(i => i.id === id);
+  if (idx >= 0) items[idx] = item;
+  else items.push(item);
+  appData.budget.items = items;
+  saveData();
+  hideModal();
+  showToast(id ? '支出已更新' : '支出已添加', 'success');
+  renderSection('budget');
+}
+
+function editBudgetItem(id) {
+  const item = appData.budget.items.find(i => i.id === id);
+  if (item) showBudgetForm(item);
+}
+
+function deleteBudgetItem(id) {
+  if (!confirm('确定删除这笔支出？')) return;
+  appData.budget.items = appData.budget.items.filter(i => i.id !== id);
+  saveData();
+  showToast('支出已删除', 'info');
+  renderSection('budget');
+}
+
+function updateTotalBudget(val) {
+  appData.budget.total = parseFloat(val) || 0;
+  saveData();
+  renderSection('budget');
+}
+
+// ==================== GUESTS ====================
+function renderGuests() {
+  const guests = appData.guests || [];
+  const grouped = {};
+  guests.forEach(g => {
+    const key = g.group || '未分组';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(g);
+  });
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">👥 宾客列表</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" onclick="showGuestGroupForm()"><i class="fa-solid fa-layer-group"></i> 管理分组</button>
+          <button class="btn btn-primary" onclick="showGuestForm()"><i class="fa-solid fa-plus"></i> 添加宾客</button>
+        </div>
+      </div>
+      <div class="stats-grid" style="margin-bottom:16px;">
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon guests"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-info"><p>总邀请</p><h3>${guests.length}</h3></div>
+        </div>
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon" style="background:#e8f8e8;color:var(--success)"><i class="fa-solid fa-check"></i></div>
+          <div class="stat-info"><p>确认出席</p><h3>${guests.filter(g=>g.rsvp==='yes').length}</h3></div>
+        </div>
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon" style="background:#fde8e8;color:var(--danger)"><i class="fa-solid fa-xmark"></i></div>
+          <div class="stat-info"><p>无法出席</p><h3>${guests.filter(g=>g.rsvp==='no').length}</h3></div>
+        </div>
+        <div class="stat-card" style="box-shadow:none;border:1px solid var(--border);">
+          <div class="stat-icon" style="background:#fef3e2;color:var(--warning)"><i class="fa-solid fa-clock"></i></div>
+          <div class="stat-info"><p>待回复</p><h3>${guests.filter(g=>g.rsvp==='pending').length}</h3></div>
+        </div>
+      </div>
+  `;
+
+  if (guests.length === 0) {
+    html += '<div class="empty-state"><i class="fa-solid fa-user-group"></i><h3>暂无宾客</h3><p>开始添加你的婚礼宾客吧</p></div></div>';
+    return html;
+  }
+
+  Object.entries(grouped).forEach(([group, gs]) => {
+    html += `
+      <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:12px;">
+        <div class="card-header">
+          <div class="card-title">📌 ${group} <span class="tag tag-default">${gs.length}人</span></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>姓名</th><th>电话</th><th>RSVP</th><th>桌号</th><th>饮食偏好</th><th>备注</th><th>操作</th></tr></thead>
+            <tbody>
+              ${gs.map(g => `
+                <tr>
+                  <td><strong>${g.name}</strong></td>
+                  <td>${g.phone || '-'}</td>
+                  <td><span class="rsvp-dot rsvp-${g.rsvp||'pending'}"></span>${({yes:'确认出席',no:'无法出席',pending:'待回复',maybe:'可能出席'})[g.rsvp]||'待回复'}</td>
+                  <td>${g.table || '-'}</td>
+                  <td>${g.diet || '-'}</td>
+                  <td>${g.note || '-'}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-xs" onclick="editGuestItem('${g.id}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-danger btn-xs" onclick="deleteGuestItem('${g.id}')"><i class="fa-solid fa-trash"></i></button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function showGuestForm(item = null) {
+  const isEdit = !!item;
+  const groups = [...new Set((appData.guests || []).map(g => g.group).filter(Boolean))];
+  const groupOptions = groups.map(g => `<option value="${g}" ${item && item.group === g ? 'selected' : ''}>${g}</option>`).join('');
+
+  showModal(`
+    <h2>${isEdit ? '编辑' : '添加'}宾客</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>姓名 *</label>
+        <input type="text" class="form-input" id="guest-name" value="${item ? item.name : ''}" placeholder="宾客姓名">
+      </div>
+      <div class="form-group">
+        <label>电话</label>
+        <input type="text" class="form-input" id="guest-phone" value="${item ? item.phone || '' : ''}" placeholder="手机号码">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>分组</label>
+        <input type="text" class="form-input" id="guest-group" value="${item ? item.group || '' : ''}" placeholder="如：新娘亲友、新郎同事" list="guest-group-list">
+        <datalist id="guest-group-list">${groupOptions}</datalist>
+      </div>
+      <div class="form-group">
+        <label>RSVP 状态</label>
+        <select class="form-select" id="guest-rsvp">
+          <option value="pending" ${item && item.rsvp === 'pending' ? 'selected' : ''}>待回复</option>
+          <option value="yes" ${item && item.rsvp === 'yes' ? 'selected' : ''}>确认出席</option>
+          <option value="no" ${item && item.rsvp === 'no' ? 'selected' : ''}>无法出席</option>
+          <option value="maybe" ${item && item.rsvp === 'maybe' ? 'selected' : ''}>可能出席</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>桌号</label>
+        <input type="text" class="form-input" id="guest-table" value="${item ? item.table || '' : ''}" placeholder="如：1号桌">
+      </div>
+      <div class="form-group">
+        <label>饮食偏好</label>
+        <select class="form-select" id="guest-diet">
+          <option value="">无特殊要求</option>
+          <option value="素食" ${item && item.diet==='素食'?'selected':''}>素食</option>
+          <option value="清真" ${item && item.diet==='清真'?'selected':''}>清真</option>
+          <option value="过敏源" ${item && item.diet==='过敏源'?'selected':''}>有过敏源</option>
+          <option value="其他" ${item && item.diet==='其他'?'selected':''}>其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <textarea class="form-textarea" id="guest-note" placeholder="补充说明...">${item ? item.note || '' : ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveGuestItem('${item ? item.id : ''}')">保存</button>
+    </div>
+  `);
+}
+
+function saveGuestItem(id) {
+  const guest = {
+    id: id || generateId(),
+    name: document.getElementById('guest-name').value,
+    phone: document.getElementById('guest-phone').value,
+    group: document.getElementById('guest-group').value,
+    rsvp: document.getElementById('guest-rsvp').value,
+    table: document.getElementById('guest-table').value,
+    diet: document.getElementById('guest-diet').value,
+    note: document.getElementById('guest-note').value
+  };
+
+  if (!guest.name) { showToast('请填写宾客姓名', 'error'); return; }
+
+  const guests = appData.guests || [];
+  const idx = guests.findIndex(g => g.id === id);
+  if (idx >= 0) guests[idx] = guest;
+  else guests.push(guest);
+  appData.guests = guests;
+  saveData();
+  hideModal();
+  showToast(id ? '宾客已更新' : '宾客已添加', 'success');
+  renderSection('guests');
+}
+
+function editGuestItem(id) {
+  const item = appData.guests.find(g => g.id === id);
+  if (item) showGuestForm(item);
+}
+
+function deleteGuestItem(id) {
+  if (!confirm('确定删除这位宾客？')) return;
+  appData.guests = appData.guests.filter(g => g.id !== id);
+  saveData();
+  showToast('宾客已删除', 'info');
+  renderSection('guests');
+}
+
+function showGuestGroupForm() {
+  const groups = [...new Set((appData.guests || []).map(g => g.group).filter(Boolean))];
+  showModal(`
+    <h2>分组管理</h2>
+    <div style="margin-bottom:16px;">
+      ${groups.length === 0 ? '<p style="color:var(--text-light);">暂无分组，添加宾客时可创建分组</p>' : groups.map(g => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span>📌 ${g}</span>
+          <span class="tag tag-default">${appData.guests.filter(guest => guest.group === g).length}人</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="hideModal()">关闭</button>
+    </div>
+  `);
+}
+
+// ==================== TIMELINE ====================
+function renderTimeline() {
+  const items = appData.timeline || [];
+  // Sort by date, then time
+  const sorted = [...items].sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return (a.time || '').localeCompare(b.time || '');
+  });
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📅 婚礼时间线</div>
+        <button class="btn btn-primary" onclick="showTimelineForm()"><i class="fa-solid fa-plus"></i> 添加事件</button>
+      </div>
+      ${sorted.length === 0 ? '<div class="empty-state"><i class="fa-solid fa-timeline"></i><h3>暂无事件</h3><p>添加婚礼当天的重要时间节点</p></div>' : `
+      <div class="timeline">
+        ${sorted.map(item => `
+          <div class="timeline-item">
+            <div class="timeline-time">${item.date || ''} ${item.time || ''}</div>
+            <div class="timeline-title">${item.title}</div>
+            <div class="timeline-desc">${item.desc || ''}</div>
+            ${item.location ? `<div class="timeline-desc">📍 ${item.location}</div>` : ''}
+            <div style="margin-top:6px;">
+              <button class="btn btn-secondary btn-xs" onclick="editTimelineItem('${item.id}')"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-danger btn-xs" onclick="deleteTimelineItem('${item.id}')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `).join('')}
+      </div>`}
+    </div>
+  `;
+  return html;
+}
+
+function showTimelineForm(item = null) {
+  const isEdit = !!item;
+  showModal(`
+    <h2>${isEdit ? '编辑' : '添加'}时间线事件</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" class="form-input" id="tl-date" value="${item ? item.date : appData.weddingDate || ''}">
+      </div>
+      <div class="form-group">
+        <label>时间</label>
+        <input type="time" class="form-input" id="tl-time" value="${item ? item.time || '' : ''}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>事件名称 *</label>
+      <input type="text" class="form-input" id="tl-title" value="${item ? item.title : ''}" placeholder="例如：新娘化妆、迎宾、仪式开始">
+    </div>
+    <div class="form-group">
+      <label>地点</label>
+      <input type="text" class="form-input" id="tl-location" value="${item ? item.location || '' : ''}" placeholder="活动地点">
+    </div>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea class="form-textarea" id="tl-desc" placeholder="详细说明...">${item ? item.desc || '' : ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveTimelineItem('${item ? item.id : ''}')">保存</button>
+    </div>
+  `);
+}
+
+function saveTimelineItem(id) {
+  const item = {
+    id: id || generateId(),
+    date: document.getElementById('tl-date').value,
+    time: document.getElementById('tl-time').value,
+    title: document.getElementById('tl-title').value,
+    location: document.getElementById('tl-location').value,
+    desc: document.getElementById('tl-desc').value
+  };
+
+  if (!item.title) { showToast('请填写事件名称', 'error'); return; }
+
+  const items = appData.timeline || [];
+  const idx = items.findIndex(i => i.id === id);
+  if (idx >= 0) items[idx] = item;
+  else items.push(item);
+  appData.timeline = items;
+  saveData();
+  hideModal();
+  showToast(id ? '事件已更新' : '事件已添加', 'success');
+  renderSection('timeline');
+}
+
+function editTimelineItem(id) {
+  const item = appData.timeline.find(i => i.id === id);
+  if (item) showTimelineForm(item);
+}
+
+function deleteTimelineItem(id) {
+  if (!confirm('确定删除这个事件？')) return;
+  appData.timeline = appData.timeline.filter(i => i.id !== id);
+  saveData();
+  showToast('事件已删除', 'info');
+  renderSection('timeline');
+}
+
+// ==================== PHOTOS ====================
+function renderPhotos() {
+  const photos = appData.photos || [];
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📸 婚礼相册</div>
+        <button class="btn btn-primary" onclick="addPhoto()"><i class="fa-solid fa-plus"></i> 添加照片</button>
+      </div>
+      <div class="photo-grid" id="photo-grid">
+        <div class="photo-card photo-add" onclick="addPhoto()">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>添加照片</span>
+        </div>
+        ${photos.map(p => `
+          <div class="photo-card">
+            <img src="${p.data}" alt="${p.name || '照片'}" loading="lazy">
+            <div class="photo-overlay">
+              <button class="btn btn-danger btn-icon" onclick="deletePhoto('${p.id}')" title="删除"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ${photos.length === 0 ? '<div class="empty-state" style="border:1px dashed var(--border);border-radius:var(--radius);margin-top:16px;"><i class="fa-solid fa-image"></i><h3>相册为空</h3><p>记录你们的甜蜜瞬间</p></div>' : ''}
+    </div>
+  `;
+  return html;
+}
+
+function addPhoto() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = function() {
+    let loaded = 0;
+    const total = this.files.length;
+    Array.from(this.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        appData.photos.push({
+          id: generateId(),
+          name: file.name,
+          data: e.target.result,
+          addedAt: new Date().toISOString()
+        });
+        loaded++;
+        if (loaded === total) {
+          saveData();
+          showToast(`${total} 张照片已添加`, 'success');
+          renderSection('photos');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+function deletePhoto(id) {
+  if (!confirm('确定删除这张照片？')) return;
+  appData.photos = appData.photos.filter(p => p.id !== id);
+  saveData();
+  showToast('照片已删除', 'info');
+  renderSection('photos');
+}
+
+// ==================== TASKS ====================
+function renderTasks() {
+  const tasks = appData.tasks || [];
+  const filter = window.taskFilter || 'all';
+  const filtered = filter === 'all' ? tasks : filter === 'done' ? tasks.filter(t => t.done) : tasks.filter(t => !t.done);
+  const doneCount = tasks.filter(t => t.done).length;
+
+  let html = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">✅ 任务清单 (${doneCount}/${tasks.length})</div>
+        <button class="btn btn-primary" onclick="showTaskForm()"><i class="fa-solid fa-plus"></i> 添加任务</button>
+      </div>
+      <div class="tabs">
+        <div class="tab ${filter === 'all' ? 'active' : ''}" onclick="window.taskFilter='all';renderSection('tasks')">全部</div>
+        <div class="tab ${filter === 'todo' ? 'active' : ''}" onclick="window.taskFilter='todo';renderSection('tasks')">未完成</div>
+        <div class="tab ${filter === 'done' ? 'active' : ''}" onclick="window.taskFilter='done';renderSection('tasks')">已完成</div>
+      </div>
+      ${filtered.length === 0 ? '<div class="empty-state"><i class="fa-solid fa-clipboard-check"></i><h3>暂无任务</h3><p>开始规划你的婚礼任务</p></div>' : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:40px;"></th><th>任务</th><th>负责人</th><th>截止日期</th><th>优先级</th><th>分类</th><th>操作</th></tr></thead>
+          <tbody>
+            ${filtered.map(t => `
+              <tr style="${t.done ? 'opacity:0.6;' : ''}">
+                <td><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')" style="width:18px;height:18px;cursor:pointer;"></td>
+                <td style="${t.done ? 'text-decoration:line-through;' : ''}"><strong>${t.title}</strong>${t.note ? `<br><small style="color:var(--text-light);">${t.note}</small>` : ''}</td>
+                <td>${t.assignee || '-'}</td>
+                <td>${t.deadline || '-'}</td>
+                <td><span class="tag ${({high:'tag-danger',medium:'tag-warning',low:'tag-info'})[t.priority]||'tag-default'}">${({high:'高',medium:'中',low:'低'})[t.priority]||'普通'}</span></td>
+                <td>${t.category || '-'}</td>
+                <td>
+                  <button class="btn btn-secondary btn-xs" onclick="editTaskItem('${t.id}')"><i class="fa-solid fa-pen"></i></button>
+                  <button class="btn btn-danger btn-xs" onclick="deleteTaskItem('${t.id}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`}
+    </div>
+  `;
+  return html;
+}
+
+function showTaskForm(item = null) {
+  const isEdit = !!item;
+  showModal(`
+    <h2>${isEdit ? '编辑' : '添加'}任务</h2>
+    <div class="form-group">
+      <label>任务名称 *</label>
+      <input type="text" class="form-input" id="task-title" value="${item ? item.title : ''}" placeholder="例如：预定婚宴场地">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>负责人</label>
+        <input type="text" class="form-input" id="task-assignee" value="${item ? item.assignee || '' : ''}" placeholder="谁负责">
+      </div>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" class="form-input" id="task-deadline" value="${item ? item.deadline || '' : ''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>优先级</label>
+        <select class="form-select" id="task-priority">
+          <option value="low" ${item && item.priority === 'low' ? 'selected' : ''}>低</option>
+          <option value="medium" ${!item || item.priority === 'medium' ? 'selected' : ''}>中</option>
+          <option value="high" ${item && item.priority === 'high' ? 'selected' : ''}>高</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>分类</label>
+        <input type="text" class="form-input" id="task-category" value="${item ? item.category || '' : ''}" placeholder="如：场地、礼服、摄影" list="task-cat-list">
+        <datalist id="task-cat-list">
+          <option value="场地"><option value="礼服"><option value="摄影"><option value="化妆"><option value="婚宴"><option value="蜜月"><option value="邀请函"><option value="婚车"><option value="其他">
+        </datalist>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注</label>
+      <textarea class="form-textarea" id="task-note" placeholder="详细说明...">${item ? item.note || '' : ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="hideModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveTaskItem('${item ? item.id : ''}')">保存</button>
+    </div>
+  `);
+}
+
+function saveTaskItem(id) {
+  const task = {
+    id: id || generateId(),
+    title: document.getElementById('task-title').value,
+    assignee: document.getElementById('task-assignee').value,
+    deadline: document.getElementById('task-deadline').value,
+    priority: document.getElementById('task-priority').value,
+    category: document.getElementById('task-category').value,
+    note: document.getElementById('task-note').value,
+    done: id ? (appData.tasks.find(t => t.id === id)?.done || false) : false
+  };
+
+  if (!task.title) { showToast('请填写任务名称', 'error'); return; }
+
+  const tasks = appData.tasks || [];
+  const idx = tasks.findIndex(t => t.id === id);
+  if (idx >= 0) tasks[idx] = task;
+  else tasks.push(task);
+  appData.tasks = tasks;
+  saveData();
+  hideModal();
+  showToast(id ? '任务已更新' : '任务已添加', 'success');
+  renderSection('tasks');
+}
+
+function editTaskItem(id) {
+  const item = appData.tasks.find(t => t.id === id);
+  if (item) showTaskForm(item);
+}
+
+function deleteTaskItem(id) {
+  if (!confirm('确定删除这个任务？')) return;
+  appData.tasks = appData.tasks.filter(t => t.id !== id);
+  saveData();
+  showToast('任务已删除', 'info');
+  renderSection('tasks');
+}
+
+function toggleTask(id) {
+  const task = appData.tasks.find(t => t.id === id);
+  if (task) {
+    task.done = !task.done;
+    saveData();
+    showToast(task.done ? '任务已完成 ✅' : '任务已重新打开', 'info');
+    renderSection('tasks');
+  }
+}
+
+// ==================== SETTINGS ====================
+function renderSettings() {
+  const s = appData.settings || {};
+  const budgetItems = (appData.budget.items || []).length;
+  const guestItems = (appData.guests || []).length;
+  const taskItems = (appData.tasks || []).length;
+  const photoItems = (appData.photos || []).length;
+
+  return `
+    <div class="card settings-section">
+      <h3>💑 基本信息</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>${appData.partner1 || '新娘'}的名字</label>
+          <input type="text" class="form-input" id="set-partner1" value="${appData.partner1 || ''}" placeholder="新娘">
+        </div>
+        <div class="form-group">
+          <label>${appData.partner2 || '新郎'}的名字</label>
+          <input type="text" class="form-input" id="set-partner2" value="${appData.partner2 || ''}" placeholder="新郎">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>婚礼日期</label>
+        <input type="date" class="form-input" id="set-wedding-date" value="${appData.weddingDate || ''}">
+      </div>
+      <button class="btn btn-primary" onclick="saveBasicSettings()"><i class="fa-solid fa-floppy-disk"></i> 保存基本信息</button>
+    </div>
+
+    <div class="card settings-section">
+      <h3>🔗 GitHub 云同步</h3>
+      <p style="font-size:13px;color:var(--text-light);margin-bottom:16px;">
+        将婚礼数据同步到你的 GitHub 私有仓库，实现多设备访问和数据备份。
+      </p>
+      <div class="form-group">
+        <label>GitHub 用户名</label>
+        <input type="text" class="form-input" id="set-gh-user" value="${s.githubUser || ''}" placeholder="your-username">
+      </div>
+      <div class="form-group">
+        <label>仓库名</label>
+        <input type="text" class="form-input" id="set-gh-repo" value="${s.githubRepo || ''}" placeholder="wedding-data">
+      </div>
+      <div class="form-group">
+        <label>Personal Access Token</label>
+        <input type="password" class="form-input" id="set-gh-token" value="${s.githubToken || ''}" placeholder="ghp_xxxxxxxxxxxx">
+        <small style="color:var(--text-light);">
+          需要 <code>repo</code> 权限。在 <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a> 创建。
+        </small>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="saveGitHubSettings()"><i class="fa-solid fa-floppy-disk"></i> 保存配置</button>
+        <button class="btn btn-secondary" onclick="syncToGitHub()"><i class="fa-brands fa-github"></i> 同步到 GitHub</button>
+        <button class="btn btn-secondary" onclick="loadFromGitHub()"><i class="fa-solid fa-download"></i> 从 GitHub 加载</button>
+      </div>
+      ${s.lastSync ? `<p style="font-size:12px;color:var(--text-light);margin-top:12px;">上次同步：${new Date(s.lastSync).toLocaleString('zh-CN')}</p>` : ''}
+    </div>
+
+    <div class="card settings-section">
+      <h3>📦 数据管理</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="exportData()"><i class="fa-solid fa-file-export"></i> 导出数据 (JSON)</button>
+        <button class="btn btn-secondary" onclick="importData()"><i class="fa-solid fa-file-import"></i> 导入数据 (JSON)</button>
+        <button class="btn btn-danger" onclick="clearAllData()"><i class="fa-solid fa-trash-can"></i> 清除所有数据</button>
+      </div>
+    </div>
+
+    <div class="card settings-section">
+      <h3>📊 数据统计</h3>
+      <table>
+        <tr><td>预算项目</td><td><strong>${budgetItems}</strong> 条</td></tr>
+        <tr><td>宾客</td><td><strong>${guestItems}</strong> 人</td></tr>
+        <tr><td>任务</td><td><strong>${taskItems}</strong> 项</td></tr>
+        <tr><td>照片</td><td><strong>${photoItems}</strong> 张</td></tr>
+        <tr><td>本地存储使用</td><td><strong>${(new Blob([localStorage.getItem(STORAGE_KEY) || '']).size / 1024).toFixed(1)} KB</strong></td></tr>
+      </table>
+    </div>
+  `;
+}
+
+function saveBasicSettings() {
+  appData.partner1 = document.getElementById('set-partner1').value;
+  appData.partner2 = document.getElementById('set-partner2').value;
+  appData.weddingDate = document.getElementById('set-wedding-date').value;
+  saveData();
+  showToast('基本信息已保存', 'success');
+  renderSection('settings');
+}
+
+function saveGitHubSettings() {
+  appData.settings.githubUser = document.getElementById('set-gh-user').value;
+  appData.settings.githubRepo = document.getElementById('set-gh-repo').value;
+  appData.settings.githubToken = document.getElementById('set-gh-token').value;
+  saveData();
+  showToast('GitHub 配置已保存', 'success');
+  renderSection('settings');
+}
+
+// ==================== GITHUB SYNC ====================
+async function syncToGitHub() {
+  const { githubToken, githubUser, githubRepo } = appData.settings;
+  if (!githubToken || !githubUser || !githubRepo) {
+    showToast('请先在下方配置 GitHub 连接信息', 'error');
+    return;
+  }
+
+  try {
+    // Prepare data for sync (exclude photo base64 data for size)
+    const syncData = {
+      weddingDate: appData.weddingDate,
+      partner1: appData.partner1,
+      partner2: appData.partner2,
+      budget: appData.budget,
+      guests: appData.guests,
+      timeline: appData.timeline,
+      photos: appData.photos.map(p => ({ id: p.id, name: p.name, addedAt: p.addedAt, data: p.data })),
+      tasks: appData.tasks,
+      syncedAt: new Date().toISOString()
+    };
+
+    const content = JSON.stringify(syncData, null, 2);
+    const base64Content = btoa(unescape(encodeURIComponent(content)));
+
+    // Check if file exists
+    const apiUrl = `https://api.github.com/repos/${githubUser}/${githubRepo}/contents/wedding-data.json`;
+    const headers = {
+      'Authorization': `token ${githubToken}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    };
+
+    let sha = null;
+    try {
+      const getResp = await fetch(apiUrl, { headers });
+      if (getResp.ok) {
+        const getData = await getResp.json();
+        sha = getData.sha;
+      }
+    } catch(e) { /* File doesn't exist yet */ }
+
+    const body = {
+      message: `Update wedding data - ${new Date().toLocaleString('zh-CN')}`,
+      content: base64Content,
+      branch: 'main'
+    };
+    if (sha) body.sha = sha;
+
+    const putResp = await fetch(apiUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    if (putResp.ok) {
+      appData.settings.lastSync = new Date().toISOString();
+      saveData();
+      showToast('✅ 数据已同步到 GitHub！', 'success');
+    } else {
+      const err = await putResp.json();
+      showToast(`同步失败：${err.message || '未知错误'}`, 'error');
+    }
+  } catch(e) {
+    showToast(`同步异常：${e.message}`, 'error');
+  }
+}
+
+async function loadFromGitHub() {
+  const { githubToken, githubUser, githubRepo } = appData.settings;
+  if (!githubToken || !githubUser || !githubRepo) {
+    showToast('请先配置 GitHub 连接信息', 'error');
+    return;
+  }
+
+  try {
+    const apiUrl = `https://api.github.com/repos/${githubUser}/${githubRepo}/contents/wedding-data.json`;
+    const resp = await fetch(apiUrl, {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      showToast(`加载失败：${err.message || '文件不存在'}`, 'error');
+      return;
+    }
+
+    const data = await resp.json();
+    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+
+    // Merge: replace server data
+    appData = {
+      ...appData,
+      weddingDate: content.weddingDate || appData.weddingDate,
+      partner1: content.partner1 || appData.partner1,
+      partner2: content.partner2 || appData.partner2,
+      budget: content.budget || appData.budget,
+      guests: content.guests || appData.guests,
+      timeline: content.timeline || appData.timeline,
+      photos: content.photos || appData.photos,
+      tasks: content.tasks || appData.tasks
+    };
+    appData.settings.lastSync = new Date().toISOString();
+    saveData();
+    showToast('✅ 数据已从 GitHub 加载！', 'success');
+    renderSection('settings');
+  } catch(e) {
+    showToast(`加载异常：${e.message}`, 'error');
+  }
+}
+
+// ==================== DATA IMPORT/EXPORT ====================
+function exportData() {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `wedding-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('数据已导出', 'success');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!confirm('导入数据将覆盖当前数据，确定继续？')) return;
+        appData = { ...DEFAULT_DATA, ...data, settings: { ...DEFAULT_DATA.settings, ...(data.settings || {}) } };
+        saveData();
+        showToast('数据已导入', 'success');
+        renderSection('dashboard');
+      } catch(err) {
+        showToast('文件格式错误', 'error');
+      }
+    };
+    reader.readAsText(this.files[0]);
+  };
+  input.click();
+}
+
+function clearAllData() {
+  if (!confirm('⚠️ 确定要清除所有婚礼数据吗？此操作不可撤销！')) return;
+  if (!confirm('再次确认：所有预算、宾客、任务、照片和设置都将被清除。')) return;
+  appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  saveData();
+  showToast('所有数据已清除', 'info');
+  renderSection('dashboard');
+}
+
+// ==================== CHARTS ====================
+function renderCharts() {
+  // Budget category chart for dashboard
+  const budgetCanvas = document.getElementById('budgetChart');
+  if (budgetCanvas) {
+    const items = appData.budget.items || [];
+    const byCategory = {};
+    items.forEach(i => {
+      const cat = i.category || '其他';
+      byCategory[cat] = (byCategory[cat] || 0) + (i.amount || 0);
+    });
+    const labels = Object.keys(byCategory);
+    const values = Object.values(byCategory);
+    const colors = ['#d4a574','#e8c5a0','#b8864e','#f5e6d3','#c0392b','#3498db','#27ae60','#f39c12','#9b59b6','#1abc9c'];
+
+    if (window._budgetChart) window._budgetChart.destroy();
+    window._budgetChart = new Chart(budgetCanvas, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values.length ? values : [1],
+          backgroundColor: values.length ? colors.slice(0, labels.length) : ['#e8ddd2'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
+        }
+      }
+    });
+  }
+
+  // Budget category chart on budget page
+  const budgetCatCanvas = document.getElementById('budgetCategoryChart');
+  if (budgetCatCanvas) {
+    const items = appData.budget.items || [];
+    const byCategory = {};
+    items.forEach(i => {
+      const cat = i.category || '其他';
+      byCategory[cat] = (byCategory[cat] || 0) + (i.amount || 0);
+    });
+    const labels = Object.keys(byCategory);
+    const values = Object.values(byCategory);
+    const colors = ['#d4a574','#e8c5a0','#b8864e','#f5e6d3','#c0392b','#3498db','#27ae60','#f39c12','#9b59b6','#1abc9c'];
+
+    if (window._budgetCatChart) window._budgetCatChart.destroy();
+    window._budgetCatChart = new Chart(budgetCatCanvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: '金额 (¥)',
+          data: values,
+          backgroundColor: colors.slice(0, labels.length),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => '¥' + v.toLocaleString() } }
+        }
+      }
+    });
+  }
+}
+
+// ==================== BIND EVENTS ====================
+function bindSectionEvents() {
+  if (currentSection === 'dashboard' || currentSection === 'budget') {
+    setTimeout(renderCharts, 100);
+  }
+  // Update guest badge
+  const guestBadge = document.getElementById('guest-count-badge');
+  if (guestBadge) {
+    const count = appData.guests.length;
+    guestBadge.textContent = count;
+    guestBadge.style.display = count > 0 ? 'inline' : 'none';
+  }
+  // Update wedding date display
+  const dateDisplay = document.getElementById('wedding-date-display');
+  if (dateDisplay && appData.weddingDate) {
+    dateDisplay.innerHTML = `💒 ${new Date(appData.weddingDate).toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric'})}`;
+  }
+
+  // Keyboard shortcut for modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideModal();
+  });
+}
+
+// ==================== INIT ====================
+function init() {
+  // Set default wedding date if not set
+  if (!appData.weddingDate) {
+    const defaultDate = new Date();
+    defaultDate.setFullYear(defaultDate.getFullYear() + 1);
+    appData.weddingDate = defaultDate.toISOString().slice(0, 10);
+    saveData();
+  }
+
+  renderSection('dashboard');
+  setInterval(() => {
+    if (currentSection === 'dashboard') renderSection('dashboard');
+  }, 30000); // Refresh countdown every 30s
+}
+
+// Handle drag & drop for tasks in guest management
+window.taskFilter = 'all';
+
+init();
+</script>
+
+</body>
+</html>
